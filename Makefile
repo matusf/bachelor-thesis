@@ -1,13 +1,16 @@
-.PHONY: clean
+.PHONY: clean watch
 
-all: main.pdf
+all: build/main.pdf
 
-main.pdf: main.tex *.tex *.bib images/*
+build/main.pdf: main.tex *.tex *.bib images/*
 	mkdir -p build
-	pdflatex -output-directory=build main
+	pdflatex -halt-on-error -output-directory=build main
 	TEXMFOUTPUT="build:" bibtex build/main
-	pdflatex -output-directory=build main
-	pdflatex -output-directory=build main
+	pdflatex -halt-on-error -output-directory=build main
+	pdflatex -halt-on-error -output-directory=build main
 
 clean:
 	rm -rf build/*
+
+watch:
+	while :; do make; sleep 60; done;
