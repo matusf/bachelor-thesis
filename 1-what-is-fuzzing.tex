@@ -1,0 +1,43 @@
+\chapter{What is fuzzing?}
+\label{cha:What is fuzzing?}
+The issue of providing production grade software was there from the inception of a software engineering. Engineers used numerous testing methods to achieve assure the quality. Most widely used testing methods were unit testing and integration testing.
+
+Unit testing consists of running automated test units where each unit tests a specific part of the application, like a couple of function or whole interface. Unit testing therefore enforces the correctness of individual parts of the application and thus it enables faster recfactorization. Nonetheless, to create selfcontained testable units, we often need to mock some parts of it, which may result in some parts being untested.
+
+Integration testing on the other hand does not run small units. It combines all units of the application and test their integration together. One possible disadvantage of integration testing is that mainly the expected path is tested. Moreover, random inputs are provided rather seldomly.
+
+\section{Why is fuzzing?}
+These methods, however, proved insufficient when Miller with his team were able to crash from 24 to 33 percent of nearly 90 unix battle tested utilities. They were generating random inputs and reporting the error if program crashed or hanged. Miller described the fuzz testing strategy as a random walk through state space of a program, represented by a state machine, searching for undefined states \cite{miller1990empirical}.
+
+The success of random walk testing - fuzzing, did not ended there. Nevertheless, before we look into differrent successful fuzzers, let's categorize them.
+
+
+\subsection{Types of fuzzers}
+\label{sub:Types of fuzzers}
+We can differentiate fuzzers according to the three categories.
+\begin{enumerate}
+    \item White-box, gray-box or black-box fuzzers
+    \item Dumb or smart fuzzers
+    \item Generation-based or mutation based fuzzers
+\end{enumerate}
+
+\subsubsection{White, gray and black-box level fuzzing}
+\label{ssub:White, gray and black-box level fuzzing}
+
+\subsection{Significant fuzzers}
+\label{ssub:Significant fuzzers}
+
+AFL
+
+OSS-FUZ
+
+Cluster fuz
+
+\section{From OS to API}
+Nowadays, more and more applications are offered as online servces.
+
+\section{What is OpenAPI?}
+This gives us advantage of knowing the input structure, thus making it easier to make \emph{smart} fuzzer.
+
+\section{Why black-box instead of white-box testing?}
+In case of offensive security
