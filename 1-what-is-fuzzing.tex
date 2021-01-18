@@ -6,8 +6,10 @@ Unit testing consists of running automated test units where each unit tests a sp
 
 Integration testing on the other hand does not run small units. It combines all units of the application and test their integration together. One possible disadvantage of integration testing is that mainly the expected path is tested. Moreover, random inputs are provided rather seldomly.
 
+One of most frequent bugs caught by fuzzers are buffer overflows, memory leaks and formatting errors. This sort of bugs may seem inocent and one might think that they will only crash the application. On the contrary, this bugs may leed to serious vulnerabilities such as heartbleed bug \cite{heartbleed2020bug} in widely used TLS implementation, which caused primary keys to leak and thus exposed the entire communication unencrypted. Additionally, there is an example implementation of how to find the heartbleed vulnerability right in the ClusterFuzz documentation \cite{clusterfuzz2020heartbleed}.
+
 \section{Why is fuzzing?}
-These methods, however, proved insufficient when Miller with his team were able to crash from 24 to 33 percent of nearly 90 unix battle tested utilities. They were generating random inputs and reporting the error if program crashed or hanged. Miller described the fuzz testing strategy as a random walk through state space of a program, represented by a state machine, searching for undefined states \cite{miller1990empirical}.
+The above mentioned testing methods, however, proved insufficient when Miller with his team were able to crash from 24 to 33 percent of nearly 90 unix battle tested utilities. They were generating random inputs and reporting the error if program crashed or hanged. Miller described the fuzz testing strategy as a random walk through state space of a program, represented by a state machine, searching for undefined states \cite{miller1990empirical}.
 
 The success of random walk testing - fuzzing, did not ended there. Nevertheless, before we look into differrent successful fuzzers, let's categorize them. Categorization will allow us to describe them more precisely.
 
@@ -49,19 +51,33 @@ Whether the fuzzer is generation-based and mutation-based depends on how the inp
 
 \section{Significant fuzzers}
 \label{ssub:Significant fuzzers}
+To understand the importance of fuzzing more, let's list some successful fuzzers along with their successful bug and vulnerability doscoveries. We will explore the architectures and interesting properties as well.
 
-AFL
-- heartbleed
+\subsection{american fuzzy lop}
+American fuzzy lop is a security-oriented fuzzer that employs a novel type of compile-time instrumentation and genetic algorithms to automatically discover clean, interesting test cases that trigger new internal states in the targeted binary \cite{zalewski2018american}. The american fuzzy lop discovered many bugs in battle-tested software. Some of the highlights are bugs discovered in Mozzilla \cite{zalewski2014uninitialized, zalewski2014two, zalewski2015uninitialized, mozzilla2015update} differrent SSL/TLS implementations \cite{bock2015out, sharma2014gnutls}, image file formats \cite{zalewski2013ijg, cunningham2014segv} and many others.
 
-OSS-FUZ
 
-Cluster fuz
+Following features make american fuzzy lop successful:
+\begin{itemize}
+    \item it is fast due to low-level compile-time or binary only instrumentation
+    \item it uses high-gain test case preprocessing and fuzzing strategies that hepls it discover even subtle and other hard-to-catch bugs
+    \item it is battery included and comes with various tools like crash explorer, a test case minimizer, a fault-triggering allocator and a syntax analyzer
+\end{itemize}
+
+\subsection{syzkaller}
+Another fuzzer than is worth to mention syzkaller. Syzkaller is an unsupervised coverage-guided fuzzer that focusses on kernel fuzzing. It generates syscalls based on syscall description, eximines the coverage produced by executed syscall and mutates the ones that were able to increate the coverage. The number of found bugs in Linux kernel speaks for itself. Syzkaller found hundreds of them \cite{syzkaller2020bugs}. Another interesting thing about syzkaller is that it can be fully automated to fuzz and subsequently report found bugs.
+
+
+\subsection{ClusterFuzz}
+
 
 \section{From OS to API}
 Nowadays, more and more applications are offered as online services.
 
-\section{What is OpenAPI?}
-This gives us advantage of knowing the input structure, thus making it easier to make \emph{smart} fuzzer.
+\subsection{What are microservices?}
+
+\subsection{What is OpenAPI?}
+OpenAPI specification, previously known as swagger, was standardized in () and adopted by the Linux Foundation. The specification describes an API. This gives us advantage of knowing the input structure, thus making it easier to make \emph{smart} fuzzer.
 
 \section{Why black-box instead of white-box testing?}
-In case of offensive security
+In case of performing offensive security we might not have access to the source code of the target to perform some analysis. We will only be able to access some interface ot the target. This is even more true when it comes to web services.
