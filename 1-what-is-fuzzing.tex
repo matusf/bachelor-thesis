@@ -56,7 +56,6 @@ To understand the importance of fuzzing more, let's list some successful fuzzers
 \subsection{american fuzzy lop}
 American fuzzy lop is a security-oriented fuzzer that employs a novel type of compile-time instrumentation and genetic algorithms to automatically discover clean, interesting test cases that trigger new internal states in the targeted binary \cite{zalewski2018american}. The american fuzzy lop discovered many bugs in battle-tested software. Some of the highlights are bugs discovered in Mozzilla \cite{zalewski2014uninitialized, zalewski2014two, zalewski2015uninitialized, mozzilla2015update} differrent SSL/TLS implementations \cite{bock2015out, sharma2014gnutls}, image file formats \cite{zalewski2013ijg, cunningham2014segv} and many others.
 
-
 Following features make american fuzzy lop successful:
 \begin{itemize}
     \item it is fast due to low-level compile-time or binary only instrumentation
@@ -69,6 +68,17 @@ Another fuzzer than is worth to mention syzkaller. Syzkaller is an unsupervised 
 
 
 \subsection{ClusterFuzz}
+ClusterFuzz is not a single fuzzer. It is a distributed fuzzing infrastructure from Google that consists of hundreds of virtual machines. Just to ilustrate its scalability, it runs around 6000 Chrome instances simoultaniously \cite{xu2017designing}. Moreover, ClusterFuzz serves as a backend for OSS-Fuzz \cite{ossfuzz2020readme}. OSS-Fuzz is a fuzzing service for open-source projects. OSS-Fuzz has found many security vulnerabilities in open-source projects like GnuTLS, FFmpeg, PCRE2 or Wireshark \cite{chang2017oss}.
+
+Thanks to following traits, as of September 2020, ClusterFuzz was able to find more than 25000 bugs in Google products and around 22500 bugs in other open-source software \cite{clusterfuzz2020readme}.
+
+\begin{itemize}
+    \item support of multiple coverage guided fuzzing engines including libFuzzer, AFL and Honggfuzz
+    \item support for black-box fuzzing
+    \item ability to duplicate the crashes
+    \item ability to shorten the fuzzing inputs for easier debugging
+    \item accurately finding regressions thanks to bisection technique
+\end{itemize}
 
 
 \section{From OS to API}
@@ -79,5 +89,5 @@ Nowadays, more and more applications are offered as online services.
 \subsection{What is OpenAPI?}
 OpenAPI specification, previously known as swagger, was standardized in () and adopted by the Linux Foundation. The specification describes an API. This gives us advantage of knowing the input structure, thus making it easier to make \emph{smart} fuzzer.
 
-\section{Why black-box instead of white-box testing?}
+\section{Why is a black-box fuzzing good fit for web services}
 In case of performing offensive security we might not have access to the source code of the target to perform some analysis. We will only be able to access some interface ot the target. This is even more true when it comes to web services.
