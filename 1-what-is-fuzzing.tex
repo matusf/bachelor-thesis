@@ -82,12 +82,17 @@ Thanks to following traits, as of September 2020, ClusterFuzz was able to find m
 
 
 \section{From OS to API}
-Nowadays, more and more applications are offered as online services.
+Most of the fuzzer we have seen so far are foccussed on low level fuzzing. They are fuzzing the syscalls, image formats, web browsers, etc. This is utterly understandable, since fuzzers are best at exposing memory bugs like use after frees all kinds of buffer overflows or uninitialized mememory \cite{chang2017oss}. Theese types of bugs naturally occur in memory unsafe languages like C or C++. Main use of memory unsafe languages is in programs that are meant to be performant or interract with the underlining system. Thus, we may see them in use in system programming and GUI applications.
+
+However, the global trend is to move away from GUI applications and offer all services via web. We can see it for example in office suits. Microsoft is now offering the entire office suit online. Furthermore, Google offers the office suit only online. The same goes for email clients, chat applications, video players, text editors and many more.
+
+To secure these online applications, we need to be able to fuzz the web services. Web services, nonetheless, are not as simple as a single application ot binary. They may consists of several other service in the backgroud. One of the prevalent wasy to organize web services is to use the microservice architecture. Let's look into it.
 
 \subsection{What are microservices?}
+Microservice architecture is a way to organize multiple loosely couplet services. Those services are typically lightweight and try to follow the unix phylosophy of doing one thing and doung it well. What is more essential for us, is that they communicate mostly via technology-agnostic protocols. One of those protocols is HTTP. Moreover, the services often use RESTfull web APIs ontop of it. To help us model the APIs, OpenAPI specification can be used.
 
-\subsection{What is OpenAPI?}
-OpenAPI specification, previously known as swagger, was standardized in () and adopted by the Linux Foundation. The specification describes an API. This gives us advantage of knowing the input structure, thus making it easier to make \emph{smart} fuzzer.
+\subsection{What is OpenAPI specification?}
+OpenAPI specification, previously known as Swagger, was standardized in 2016 and become over seen by the OpenAPI Initiative \cite{openapi2020main}. The specification describes an API in a machine-readable way (usually in JSON or YAML format). It defines differrent endpoints of the API along with the required and optional headers and response codes. Besides, it defines the payload fields, types and encodings. This gives us advantage of knowing the input structure, thus making it easier to make \emph{smart} fuzzer.
 
-\section{Why is a black-box fuzzing good fit for web services}
+\subsection{Why is a black-box fuzzing good fit for web services}
 In case of performing offensive security we might not have access to the source code of the target to perform some analysis. We will only be able to access some interface ot the target. This is even more true when it comes to web services.
