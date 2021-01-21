@@ -1,17 +1,17 @@
 \chapter{Introduction to fuzzing}
 \label{cha:Introduction to fuzzing}
-The issue of providing production grade software was there from the inception of a software engineering. Engineers used numerous testing methods to achieve assure the quality. Most widely used testing methods were unit testing and integration testing.
+The issue of providing production-grade software was there from the inception of software engineering. Engineers used numerous testing methods to achieve the desired quality. Most widely used testing methods were unit testing and integration testing.
 
-Unit testing consists of running automated test units where each unit tests a specific part of the application, like a couple of function or whole interface. Unit testing therefore enforces the correctness of individual parts of the application and thus it enables faster recfactorization. Nonetheless, to create selfcontained testable units, we often need to mock some parts of it, which may result in some parts being untested.
+Unit testing consists of running automated test units where each unit tests a specific part of the application, like a couple of function or whole interface. Unit testing, therefore, enforces the correctness of individual parts of the application and thus it enables faster refactorization. Nonetheless, to create self-contained testable units, we often need to mock some parts of it, which may result in some parts being untested.
 
-Integration testing on the other hand does not run small units. It combines all units of the application and test their integration together. One possible disadvantage of integration testing is that mainly the expected path is tested. Moreover, random inputs are provided rather seldomly.
+Integration testing, on the other hand, does not run small units. It combines all units of the application and tests their integration together. One possible disadvantage of integration testing is that mainly the expected path is tested. Moreover, random inputs are provided rather seldomly.
 
-One of most frequent bugs caught by fuzzers are buffer overflows, memory leaks and formatting errors. This sort of bugs may seem inocent and one might think that they will only crash the application. On the contrary, this bugs may leed to serious vulnerabilities such as heartbleed bug \cite{heartbleed2020bug} in widely used TLS implementation, which caused primary keys to leak and thus exposed the entire communication unencrypted. Additionally, there is an example implementation of how to find the heartbleed vulnerability right in the ClusterFuzz documentation \cite{clusterfuzz2020heartbleed}.
+One of the most frequent bugs caught by fuzzers are buffer overflows, memory leaks and formatting errors. This sort of bugs may seem innocent and one might think that they will only crash the application. On the contrary, this bugs may leed to severe vulnerabilities such as heartbleed bug \cite{heartbleed2020bug} in widely used TLS implementation, which caused primary keys to leak and thus exposed the entire communication unencrypted. Additionally, there is an example implementation of how to find the heartbleed vulnerability right in the ClusterFuzz documentation \cite{clusterfuzz2020heartbleed}.
 
 \section{Why is fuzzing}
-The above mentioned testing methods, however, proved insufficient when Miller with his team were able to crash from 24 to 33 percent of nearly 90 unix battle tested utilities. They were generating random inputs and reporting the error if program crashed or hanged. Miller described the fuzz testing strategy as a random walk through state space of a program, represented by a state machine, searching for undefined states \cite{miller1990empirical}.
+The above-mentioned testing methods, however, proved insufficient when Miller with his team was able to crash from 24\% to 33\% of nearly 90 Unix battle-tested utilities. They were generating random inputs and reporting the error if the program crashed or hanged. Miller described the fuzz testing strategy as a random walk through state space of a program, represented by a state machine, searching for undefined states \cite{miller1990empirical}.
 
-The success of random walk testing - fuzzing, did not ended there. Nevertheless, before we look into differrent successful fuzzers, let's categorize them. Categorization will allow us to describe them more precisely.
+The success of random walk testing - fuzzing, did not end there. Nevertheless, before we look into different successful fuzzers, let's categorize them. Categorization will allow us to describe them more precisely.
 
 
 \section{Types of fuzzers}
@@ -25,7 +25,7 @@ We can differentiate fuzzers according to the three categories.
 
 \subsection{White-box gray-box and black-box fuzzers}
 \label{ssub:White-box gray-box and black-box fuzzers}
-\textbf{White-box fuzzers} are aware of the internal structure of the program. Thus, they need to have access to the source code of the program. They use a program analysis to increase a code coverage \cite{neystadt2008automated}. We may define code coverage as a measurement of how much of the state space is reached during the random walk. In case of available program specification, the fuzzer may leverage techniques from model-based testing to generate testing  inputs and subsequently verify it with the specification. White-box fuzzers, however, may need a substantial time to be integrated with the fuzzed target.
+\textbf{White-box fuzzers} are aware of the internal structure of the program. Thus, they need to have access to the source code of the program. They use a program analysis to increase a code coverage \cite{neystadt2008automated}. We may define code coverage as a measurement of how much of the state space is reached during the random walk. In case of available program specification, the fuzzer may leverage techniques from model-based testing to generate testing inputs and subsequently verify it with the specification. White-box fuzzers, however, may need a substantial time to be integrated with the fuzzed target.
 
 \textbf{Black-box fuzzers} on the other hand are not aware of the program structure. They treat the program as a black-box. They test the compiled version of the program \cite{takanen2018fuzzing}. Since the black-box fuzzers do not need to know anything about the program structure, they tend to be more performant and reusable. Hight level of paralelization can be usually applied as well. Additionally, black-fuzzing is often combined with \emph{smart} fuzzing technique \cite{neystadt2008automated}, about which we will talk in a while. The disadvantage of the black-box fuzzing technique is that it may not achieve as high code coverage as white-box fuzzer due to not having any knowledge about the program structure.
 
@@ -36,41 +36,41 @@ We can differentiate fuzzers according to the three categories.
 \label{ssub:Dumb and smart fuzzers}
 The primary job of a fuzzer is to generate some input. The input should be \emph{valid enough} that it will not be rejected directly by a parser. But it should be \emph{invalid enough} that it will test the program thoroughly as well.
 
-\textbf{\emph{Smart} fuzzer} knows the structure of the input data. For instance, it knows that it will be fuzzing application that uses specific protocol. Thus, it will comply with the protocol by sending data in appropriate format, computing the correct check sums, etc. Then it will send the fuzzed input via this protocol in correct a format.
+\textbf{\emph{Smart} fuzzer} knows the structure of the input data. For instance, it knows that it will be fuzzing an application that uses a specific protocol. Thus, it will comply with the protocol by sending data in an appropriate format, computing the correct checksums, etc. Then it will send the fuzzed input via this protocol in a valid format.
 
-On the other hand, \textbf{\emph{Dumb} fuzzer} does not know anything about the input structure. It may take the input that is accepted by the program and start fliping some bits in it or insertind some random sequences of bits. This approach has the obvoius disadvantage when compared to the \emph{smart} fuzzer. It will generate a lot of input that will be rejected right away by the input parser of the program. Advantage of \emph{dumb} fuzzer is its reusability and easier implementation.
+On the other hand, \textbf{\emph{Dumb} fuzzer} does not know anything about the input structure. It may take the input that is accepted by the program and start flipping some bits in it or inserting some random sequences of bits. This approach has the obvious disadvantage when compared to the \emph{smart} fuzzer. It will generate a lot of input that will be rejected right away by the input parser of the program. The advantage of \emph{dumb} fuzzer is its reusability and easier implementation.
 
 \subsection{Generation-based and mutation-based fuzzers}
 \label{ssub:Generation-based and mutation-based fuzzers}
 Whether the fuzzer is generation-based and mutation-based depends on how the input data is created.
 
-\textbf{Mutation-based} fuzzer creates new input from valid input \cite{miller2007analysis}. It may for instance collect some files or network traffic, modify it by applying heuristics or randomness and subsequently use it as a new input. A such modification might include changing the length of some parameters or changing the signess of some integer parameters.
+\textbf{Mutation-based} fuzzer creates new input from valid input \cite{miller2007analysis}. It may for instance collect some files or network traffic, modify it by applying heuristics or randomness, and subsequently use it as a new input. Such modification might include changing the length of some parameters or changing the signedness of some integer parameters.
 
-\textbf{Generation-based} fuzzer generates the input data is created from scratch based on a RFC or other specification \cite{miller2007analysis}. This approach may sometimes generate an input that is valid an have too little randomness. Moreover,the need for specification makes the implementation of the fuzzer more difficult. On the other side, Muller showed that generation-based fuzzing possesses benefits and performs up to 76\% better when compared to mutation-based fuzzing techniques \cite{miller2007analysis}.
+\textbf{Generation-based} fuzzer generates the input data is created from scratch based on an RFC or other specification \cite{miller2007analysis}. This approach may sometimes generate a valid input that has too little randomness. Moreover, the need for specification makes the implementation of the fuzzer more difficult. On the other side, Miller showed that generation-based fuzzing possesses benefits and performs up to 76\% better when compared to mutation-based fuzzing techniques \cite{miller2007analysis}.
 
 
 \section{Significant fuzzers}
 \label{ssub:Significant fuzzers}
-To understand the importance of fuzzing more, let's list some successful fuzzers along with their successful bug and vulnerability doscoveries. We will explore the architectures and interesting properties as well.
+To understand the importance of fuzzing more, let's list some successful fuzzers along with their successful bug and vulnerability discoveries. We will explore the architectures and interesting properties as well.
 
 \subsection{american fuzzy lop}
-American fuzzy lop is a security-oriented fuzzer that employs a novel type of compile-time instrumentation and genetic algorithms to automatically discover clean, interesting test cases that trigger new internal states in the targeted binary \cite{zalewski2018american}. The american fuzzy lop discovered many bugs in battle-tested software. Some of the highlights are bugs discovered in Mozzilla \cite{zalewski2014uninitialized, zalewski2014two, zalewski2015uninitialized, mozzilla2015update} differrent SSL/TLS implementations \cite{bock2015out, sharma2014gnutls}, image file formats \cite{zalewski2013ijg, cunningham2014segv} and many others.
+American fuzzy lop is a security-oriented fuzzer that employs a novel type of compile-time instrumentation and genetic algorithms to automatically discover clean, interesting test cases that trigger new internal states in the targeted binary \cite{zalewski2018american}. The american fuzzy lop discovered many bugs in battle-tested software. Some of the highlights are bugs discovered in Mozilla \cite{zalewski2014uninitialized, zalewski2014two, zalewski2015uninitialized, mozzilla2015update} different SSL/TLS implementations \cite{bock2015out, sharma2014gnutls}, image file formats \cite{zalewski2013ijg, cunningham2014segv} and many others.
 
-Following features make american fuzzy lop successful:
+The following features make american fuzzy lop successful:
 \begin{itemize}
-    \item it is fast due to low-level compile-time or binary only instrumentation
-    \item it uses high-gain test case preprocessing and fuzzing strategies that hepls it discover even subtle and other hard-to-catch bugs
-    \item it is battery included and comes with various tools like crash explorer, a test case minimizer, a fault-triggering allocator and a syntax analyzer
+    \item it is fast due to low-level compile-time or binary-only instrumentation
+    \item it uses high-gain test case preprocessing and fuzzing strategies that help it discover even subtle and other hard-to-catch bugs
+    \item it is battery included and comes with various tools like a crash explorer, a test case minimizer, a fault-triggering allocator, and a syntax analyzer
 \end{itemize}
 
 \subsection{syzkaller}
-Another fuzzer than is worth to mention syzkaller. Syzkaller is an unsupervised coverage-guided fuzzer that focusses on kernel fuzzing. It generates syscalls based on syscall description, eximines the coverage produced by executed syscall and mutates the ones that were able to increate the coverage. The number of found bugs in Linux kernel speaks for itself. Syzkaller found hundreds of them \cite{syzkaller2020bugs}. Another interesting thing about syzkaller is that it can be fully automated to fuzz and subsequently report found bugs.
+Another fuzzer that is worth mentioning is syzkaller. Syzkaller is an unsupervised coverage-guided fuzzer that focuses on kernel fuzzing. It generates syscalls based on syscall description, examines the coverage produced by an executed syscall, and mutates the ones that were able to increase the coverage. The number of found bugs in the Linux kernel speaks for itself. Syzkaller found hundreds of them \cite{syzkaller2020bugs}. Another thing about syzkaller is that it can be fully automated to fuzz and subsequently report found bugs.
 
 
 \subsection{ClusterFuzz}
-ClusterFuzz is not a single fuzzer. It is a distributed fuzzing infrastructure from Google that consists of hundreds of virtual machines. Just to ilustrate its scalability, it runs around 6000 Chrome instances simoultaniously \cite{xu2017designing}. Moreover, ClusterFuzz serves as a backend for OSS-Fuzz \cite{ossfuzz2020readme}. OSS-Fuzz is a fuzzing service for open-source projects. OSS-Fuzz has found many security vulnerabilities in open-source projects like GnuTLS, FFmpeg, PCRE2 or Wireshark \cite{chang2017oss}.
+ClusterFuzz is not a single fuzzer. It is a distributed fuzzing infrastructure from Google that consists of hundreds of virtual machines. Just to illustrate its scalability, it runs around 6000 Chrome instances simultaneously \cite{xu2017designing}. Moreover, ClusterFuzz serves as a backend for OSS-Fuzz \cite{ossfuzz2020readme}. OSS-Fuzz is a fuzzing service for open-source projects. OSS-Fuzz has found many security vulnerabilities in open-source projects like GnuTLS, FFmpeg, PCRE2, or Wireshark \cite{chang2017oss}.
 
-Thanks to following traits, as of September 2020, ClusterFuzz was able to find more than 25000 bugs in Google products and around 22500 bugs in other open-source software \cite{clusterfuzz2020readme}.
+Thanks to the following traits, as of September 2020, ClusterFuzz was able to find more than 25000 bugs in Google products and around 22500 bugs in other open-source software \cite{clusterfuzz2020readme}.
 
 \begin{itemize}
     \item support of multiple coverage guided fuzzing engines including libFuzzer, AFL and Honggfuzz
@@ -82,17 +82,17 @@ Thanks to following traits, as of September 2020, ClusterFuzz was able to find m
 
 
 \section{From OS to API}
-Most of the fuzzer we have seen so far are foccussed on low level fuzzing. They are fuzzing the syscalls, image formats, web browsers, etc. This is utterly understandable, since fuzzers are best at exposing memory bugs like use after frees all kinds of buffer overflows or uninitialized mememory \cite{chang2017oss}. Theese types of bugs naturally occur in memory unsafe languages like C or C++. Main use of memory unsafe languages is in programs that are meant to be performant or interract with the underlining system. Thus, we may see them in use in system programming and GUI applications.
+Most of the fuzzers we have seen so far are focused on low-level fuzzing. They are fuzzing the syscalls, image formats, web browsers, etc. This is utterly understandable since fuzzers are best at exposing memory bugs like use after frees all kinds of buffer overflow or uninitialized memory \cite{chang2017oss}. These types of bugs naturally occur in memory unsafe languages like C or C++. The main use of memory unsafe languages is in programs that are meant to be performant or interact with the underlining system. Thus, we may see them used in system programming and GUI applications.
 
-However, the global trend is to move away from GUI applications and offer all services via web. We can see it for example in office suits. Microsoft is now offering the entire office suit online. Furthermore, Google offers the office suit only online. The same goes for email clients, chat applications, video players, text editors and many more.
+However, the global trend is to move away from GUI applications and offer all services via the web. We can see it, for example, in office suits. Microsoft is now offering the entire office suite online. Furthermore, Google offers the office suite only online. The same goes for email clients, chat applications, video players, text editors, and many more.
 
-To secure these online applications, we need to be able to fuzz the web services. Web services, nonetheless, are not as simple as a single application ot binary. They may consists of several other service in the backgroud. One of the prevalent wasy to organize web services is to use the microservice architecture. Let's look into it.
+To secure these online applications, we need to be able to fuzz the web services. Web services, nonetheless, are not as simple as a single application or binary. They may consist of several other services in the background. One of the prevalent ways to organize web services is to use the microservice architecture. Let's look into it.
 
 \subsection{What are microservices}
-Microservice architecture is a way to organize multiple loosely couplet services. Those services are typically lightweight and try to follow the unix phylosophy of doing one thing and doung it well. What is more essential for us, is that they communicate mostly via technology-agnostic protocols. One of those protocols is HTTP. Moreover, the services often use RESTfull web APIs ontop of it. To help us model the APIs, OpenAPI specification can be used.
+Microservice architecture is a way to organize multiple loosely coupled services. Those services are typically lightweight and try to follow the Unix philosophy of doing one thing and doing it well. What is more essential for us, is that they communicate mostly via technology-agnostic protocols. One of those protocols is HTTP. Moreover, the services often use RESTfull web APIs on top of it. To help us model the APIs, OpenAPI specifications can be used.
 
 \subsection{What is OpenAPI specification}
-OpenAPI specification, previously known as Swagger, was standardized in 2016 and become over seen by the OpenAPI Initiative \cite{openapi2020main}. The specification describes an API in a machine-readable way (usually in JSON or YAML format). It defines differrent endpoints of the API along with the required and optional headers and response codes. Besides, it defines the payload fields, types and encodings. This gives us advantage of knowing the input structure, thus making it easier to make \emph{smart} fuzzer.
+OpenAPI specification, previously known as Swagger, was standardized in 2016 and become overseen by the OpenAPI Initiative \cite{openapi2020main}. The specification describes an API in a machine-readable way (usually in JSON or YAML format). It defines different endpoints of the API along with the required and optional headers and response codes. Besides, it defines the payload fields, types, and encodings. This gives us the advantage of knowing the input structure, thus making it easier to make \emph{smart} fuzzer.
 
 \subsection{Why is a black-box fuzzing good fit for web services}
-In case of performing offensive security we might not have access to the source code of the target to perform some analysis. We will only be able to access some interface ot the target. This is even more true when it comes to web services.
+In the case of performing offensive security, we might not have access to the source code of the target to perform some analysis. We will only be able to access some interface of the target. This is even more true when it comes to web services.
