@@ -167,24 +167,28 @@ There will be an abstract in English.
 
 \newpage
 
-% \listoffigures
-% \listoftables
+\listoffigures
+\listoftables
 
 % ---  Koniec Zoznamov
 
 \mainmatter
 
 \chapter{Introduction}
-Here I'll write about my thesis.
+Here will be an Introduction to my thesis.
 
-\input 1-what-is-fuzzing.tex
+\input introduction-to-fuzzing.tex
+\input analysis-of-exiting-work.tex
+\input architecture-of-out-fuzzer.tex
 
-\chapter{Analysis of existing work}
-\chapter{Architecture of our fuzzer}
 \chapter{Implementation}
-\chapter{Our findings}
-\chapter{Conclusion}
+In this chapter we discuss the implementation of the fuzzer.
 
+\chapter{Our findings}
+Here we will write about what we were able to achieve with our fuzzer and describe different bugs found by our fuzzer.
+
+\chapter{Conclusion}
+Here will be a conclusion of my thesis.
 
 % -------------------
 % --- Bibliografia
@@ -199,6 +203,6 @@ Here I'll write about my thesis.
 \clearpage
 
 \bibliographystyle{plain}
-\bibliography{literatura}
+\bibliography{bibliography}
 
 \end{document}

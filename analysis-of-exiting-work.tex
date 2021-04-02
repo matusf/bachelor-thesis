@@ -1,0 +1,43 @@
+\chapter{Analysis of existing work}
+In this chapter we will discuss and compare the existing fuzzers that focus on fuzzing of web services. \label{sub:Types of fuzzers} Moreover, we will try to find their shortcommings that we would like to subsequently improve on in our architecture and implementation.
+
+\section{apiFuzz}
+The first fuzzer we will talk about is apiFuzz \cite{apiFuzz2020github}. It fuzzes a single HTTP request. The fuzzer accepts the input in form of \texttt{curl} command. It extracts headers, authentication, query parameters, body, path and url by parsing the \texttt{curl} command line arguments.
+
+It assumes that the request body is in a JSON format and starts the mutation of the individual key and value fields in the JSON body. By mutating also the keys of the JSON payload it breaks the grammar rules for the input. This will cause, that the most of the found bugs will be in the JSON parser code. Locating a bug in the JSON parser code has the advantage that multiple services might be using the same JSON library and therefore there is a high probability that the bug will occur there as well. On the other hand, by breking the grammar rules most request will not pass the JSON parser and therefore will not able to trigger some unexpected behaviour of the application logic. Thus dramatically decreasing the code coverage.
+
+We may say that apiFuzz is a smart fuzzer as it is able to determine the structure as well as the types of input data from the parsed \texttt{curl} command line arguments. However, it is limited by the data provided by the \texttt{curl} command. For instance when the endpoint is able to accept Additional JSON fields that were not included in the \texttt{curl} command, the apiFuzz will not fuzz them.
+
+
+
+
+% - black box
+%     - multiproces
+% - semi smart
+% - mutation based
+% - need to specify url (parses curl)
+% - python
+% - not besst reporting
+
+\section{RESTler}
+The next fuzzer we will take a look at is RESTler developed by Microsoft Research team \cite{atlidakis2019restler}.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|c|c c|}
+\hline
+& apiFuzz  &  RESTler  \\
+\hline
+aware of internal structure & black-box & black-box \\
+aware of input date structure & semi-smart & smart \\
+input generation technique & mutation & generation \\
+statefullness & stateless & statefull \\
+\hline
+\end{tabular}
+\caption{Comparison of fuzzers focused on fuzzing web services}
+\label{table:fuzzers-comparison}
+\end{center}
+\end{table}
+
+As we can see in table \ref{table:fuzzers-comparison} every discussed fuzzer was using a back-box fuzzing technique. The prelevance of this technique is understandable as their goals si reusability. Moreover, it is rather difficult to monitor a binary without an access to it, which might by the case of the web services.
+
