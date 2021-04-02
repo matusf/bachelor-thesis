@@ -78,20 +78,3 @@ Thanks to the following traits, as of September 2020, ClusterFuzz was able to fi
     \item ability to shorten the fuzzing inputs for easier debugging
     \item accurately finding regressions by comparing different versions of the fuzzed software and determining in which commit was the bug introduced
 \end{itemize}
-
-
-\section{From OS to API}
-Most of the fuzzers we have seen so far are focused on low-level fuzzing. They are fuzzing the syscalls, image formats, web browsers, etc. This is utterly understandable since fuzzers are best at exposing memory bugs like use-after-frees, all kinds of buffer overflow or uninitialized memory \cite{chang2017oss}. These types of bugs naturally occur in memory unsafe languages like C or C++. The main use of memory unsafe languages is in programs that are meant to be performant or interact with the underlining system. Thus, we may see them used in system programming and GUI applications.
-
-However, the global trend is to move away from GUI applications and offer all services via the web. We can see it, for example, in office suits. Microsoft is now offering the entire office suite online. Furthermore, Google offers the office suite only online. The same goes for email clients, chat applications, video players, text editors, and many more.
-
-To secure these online applications, we need to be able to fuzz the web services. Web services, nonetheless, are not as simple as a single application or binary. They may consist of several other services in the background. One of the prevalent ways to organize web services is to use the microservice architecture, which we describe in the next subsection.
-
-\subsection{What are microservices}
-Microservice architecture is a way to organize multiple loosely coupled services. Those services are typically lightweight and try to follow the Unix philosophy of doing one thing and doing it well. What is more essential for us, is that they communicate mostly via technology-agnostic protocols \cite{nadareishvili2016microservice}. One of those protocols is HTTP. Moreover, the services often use RESTfull web APIs on top of it. To help us model the APIs, OpenAPI specifications can be used.
-
-\subsection{What is OpenAPI specification}
-OpenAPI specification, previously known as Swagger, was standardized in 2016 and become overseen by the OpenAPI Initiative \cite{openapi2020main}. The specification describes an API in a machine-readable way (usually in JSON or YAML format). It defines different endpoints of the API along with the required and optional headers and response codes. Besides, it defines the payload fields, types, and encodings. This gives us the advantage of knowing the input structure, thus making it easier to make a \emph{smart} fuzzer.
-
-\subsection{Why is a black-box fuzzing good fit for web services}
-In the case of performing offensive security, we might not have access to the source code of the target to perform some analysis. We will only be able to access some interface of the target. This is even more true when it comes to web services.
