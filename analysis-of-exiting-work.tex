@@ -1,5 +1,5 @@
 \chapter{Analysis of existing work}
-In this chapter we will discuss and compare the existing fuzzers that focus on fuzzing of web services. \label{sub:Types of fuzzers} Moreover, we will try to find their shortcommings that we would like to subsequently improve on in our architecture and implementation.
+In this chapter we will discuss and compare the existing fuzzers that focus on fuzzing of web services. More precisely to the existing fuzzer with focus on application level fuzzing since it is the most relevant to us. \label{sub:Types of fuzzers} Moreover, we will try to find their shortcommings that we would like to subsequently improve on in our architecture and implementation.
 
 \section{apiFuzz}
 The first fuzzer we will talk about is apiFuzz \cite{apiFuzz2020github}. It fuzzes a single HTTP request. The fuzzer accepts the input in form of \texttt{curl} command. It extracts headers, authentication, query parameters, body, path and url by parsing the \texttt{curl} command line arguments.
@@ -9,14 +9,22 @@ It assumes that the request body is in a JSON format and starts the mutation of 
 We may say that apiFuzz is a smart fuzzer as it is able to determine the structure as well as the types of input data from the parsed \texttt{curl} command line arguments. However, it is limited by the data provided by the \texttt{curl} command. For instance when the endpoint is able to accept Additional JSON fields that were not included in the \texttt{curl} command, the apiFuzz will not fuzz them.
 
 Finally, the apiFuzz is not aware of the internal structure of the fuzzed program. As a result, it is able to fuzz targets without having the access to the target's source code or even a binary. Additionaly, since apiFuzz fuzzes a single request to single endpoint it is improbable to change the state of the web service. For instance, if it would fuzz one endpoint that creates some object and anotherone that retrieves the object it may, the result of the second request might be affected by the first one. The combination of statelessness with black-box technique makes the paralelization trivial and apiFuzz takes advantage of it.
-% - python
+
+\section{TnT-Fuzz}
+The next fuzzer we will describe is TnT-Fuzz \cite{tntFuzzer2020github}. One could think of  TnT-Fuzz as an apiFuzz scaled up. While apiFuzz fuzzes single endpoint, TnT-Fuzz fuzzes all of them. Moreover, it automates the exploration of different endpoints by parsesing the OpenAPI specification. From the specification it also gets the correct input types as well as where in the request they should be placed. For example, in request headers, body od \texttt{url} query parameters.
+
+% failed to run
+% unable to create objects according to spec -> most common
+% not entirely folloving spec
+% uses mutation which destroys keys
+
 
 \section{RESTler}
-The next fuzzer we will take a look at is called RESTler developed by Microsoft Research team \cite{atlidakis2019restler}. As the RESTler's research paper states, the main asset of RESTler is statefullness. Moreover, it claims to be the statefull REST API fuzzer. Before we proceed with exploration of its numerous features, let us look into what statefullness means in context of API fuzzers.
+The last fuzzer we will take a look at is called RESTler developed by Microsoft Research team \cite{atlidakis2019restler}. As the RESTler's research paper states, the main asset of RESTler is statefullness. Moreover, it claims to be the statefull REST API fuzzer. Before we proceed with exploration of its numerous features, let us look into what statefullness means in context of API fuzzers.
 
 Nearly every service holds some state, mainly in form of database. Making a request to the API may change the state. For example, \texttt{POST} request will create and \texttt{PUT} request will update an item in the database. Knowing whether an item exists is crutial if the most  efficient usage of resources is desired. Request that queryies an item that yet was not created is essentially useless. The API will most probably response with status code signaling user error - \texttt{Not Found}. This kind of request only wasted the valuable resources.
 
-To minimize meaningless request RESTler infers producer-consumer dependencies among request types. e.g sending request \texttt{A} makes sense only if request \texttt{B} was sent before. RESTler is able to infer those dependencies by examining \texttt{OpenAPI} specification of fuzzed service. Then it performs a breadth-first search to create a valid sequence of requests with satisfied dependencies. The successful request is denoted by receiving HTTP status code in 200 range. When the sequence is not successful - status code in range 400 is received, RESTler will not add that request to the sequence chain. However, requests frequently take some input. The input might be in form of a request body, \texttt{url} query parameters, headers or cookies. Therefore response from a sigle endpoint differs when we send a different input to it. To solve this issue RESTler maintains a \textit{fuzzing dictionary}. \textit{Fuzzing dictionary} typically consists of sample values for every fuzzable type. For instance, string type values may have include \texttt{""} (empty string) or \texttt{"somestring"}. Integer types, on the other hand, may include \texttt{0} and \texttt{1}. However, RESTler needs to keep the aforementioned \textit{fuzzing dictionary} rather small since with the size of the dictionary the the complexity of graph increases as well. One notable disadvantage of the \texttt{BFS} strategy is the lack of randomness that is caused by small dictionary size.
+To minimize meaningless request RESTler infers producer-consumer dependencies among request types. e.g sending request \texttt{A} makes sense only if request \texttt{B} was sent before. RESTler is able to infer those dependencies by examining swagger specification (OpenAPI v2) of fuzzed service. Then it performs a breadth-first search to create a valid sequence of requests with satisfied dependencies. The successful request is denoted by receiving HTTP status code in 200 range. When the sequence is not successful - status code in range 400 is received, RESTler will not add that request to the sequence chain. However, requests frequently take some input. The input might be in form of a request body, \texttt{url} query parameters, headers or cookies. Therefore response from a sigle endpoint differs when we send a different input to it. To solve this issue RESTler maintains a \textit{fuzzing dictionary}. \textit{Fuzzing dictionary} typically consists of sample values for every fuzzable type. For instance, string type values may have include \texttt{""} (empty string) or \texttt{"somestring"}. Integer types, on the other hand, may include \texttt{0} and \texttt{1}. However, RESTler needs to keep the aforementioned \textit{fuzzing dictionary} rather small since with the size of the dictionary the the complexity of graph increases as well. One notable disadvantage of the \texttt{BFS} strategy is the lack of randomness that is caused by small dictionary size.
 
 In addition to \texttt{BFS} strategy, Microsoft Research team incorporated random walk strategy to the RESTler as well. This strategy has loosed requirements on the choice of requests. RESTler still makes the dynamic analysis of requirements for each request. Meaning that it will add a request to a request sequence only when all dependencies are satisfied. Nevertheless, it will not send them and check the response code to verify that the request sequence is indeed valid.
 
@@ -26,19 +34,16 @@ In addition to the \textit{Blog Post Service}, Microsoft Research team fuzzed wi
 
 As for the error reporting, RESTler works similar to the apiFuzz. It logs a bug if a \texttt{500 HTTP} status code - \texttt{Internal Server Error} is received. Nonetheless, RESTler is able to repla the results. i.e. when bug is found, RESTler will recurse backwards and log the whole request sequence that lead to the bug.
 
-\section{TnT-Fuzz}
-
-
 \begin{table}
 \begin{center}
-\begin{tabular}{|c|c c|}
+\begin{tabular}{|c|c c c|}
 \hline
-& apiFuzz  &  RESTler  \\
+& apiFuzz  &  RESTler & TnT-Fuzz \\
 \hline
-aware of internal structure & black-box & black-box \\
-aware of input date structure & semi-smart & smart \\
-input generation technique & mutation & generation \\
-statefullness & stateless & statefull \\
+aware of internal structure & black-box & black-box & black-box \\
+aware of input date structure & semi-smart & smart & semi-smart \\
+input generation technique & mutation & generation & combined\\
+statefullness & stateless & statefull & stateless\\
 \hline
 \end{tabular}
 \caption{Comparison of fuzzers focused on fuzzing web services}
@@ -48,6 +53,6 @@ statefullness & stateless & statefull \\
 
 As we are able to see, API fuzzers have numerous similarities. One of which we have not mentioned yet is a language of implementation. All above-mentioned fuzzer are implemented in \texttt{Python} programing language. \texttt{Python} is a high-level multiparadigm dynamic scipting language. Due to its dynamic nature \texttt{Python} comes especially useful when generating random and unstructured data. Moreover, \texttt{Python} offers a large variety of community-developed modules, for instance \texttt{requests} module including \texttt{HTTP} client for sending requests.
 
-As we can see in table \ref{table:fuzzers-comparison} every discussed fuzzer was using a back-box fuzzing technique. The prelevance of this technique is understandable as their frequent goal is reusability. Moreover, it is rather difficult to monitor a binary without an access to it, which might by the case of the web services.
+As we can see in table \ref{table:fuzzers-comparison} every discussed fuzzer was using a back-box fuzzing technique. The prelevance of this technique is understandable as their frequent goal is reusability. Moreover, it is rather difficult to monitor a binary without having an access to it, which might by the case of the web services.
 
 To conclude this chapter, we may say that the field of API fuzzers is not as widely researched as the field of fuzzing binaries, which gives us an interesting opportunity to explore it and find out new facts and connections.
