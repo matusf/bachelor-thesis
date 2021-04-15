@@ -11,12 +11,13 @@ We may say that apiFuzz is a smart fuzzer as it is able to determine the structu
 Finally, the apiFuzz is not aware of the internal structure of the fuzzed program. As a result, it is able to fuzz targets without having the access to the target's source code or even a binary. Additionaly, since apiFuzz fuzzes a single request to single endpoint it is improbable to change the state of the web service. For instance, if it would fuzz one endpoint that creates some object and anotherone that retrieves the object it may, the result of the second request might be affected by the first one. The combination of statelessness with black-box technique makes the paralelization trivial and apiFuzz takes advantage of it.
 
 \section{TnT-Fuzz}
-The next fuzzer we will describe is TnT-Fuzz \cite{tntFuzzer2020github}. One could think of  TnT-Fuzz as an apiFuzz scaled up. While apiFuzz fuzzes single endpoint, TnT-Fuzz fuzzes all of them. Moreover, it automates the exploration of different endpoints by parsesing the OpenAPI specification. From the specification it also gets the correct input types as well as where in the request they should be placed. For example, in request headers, body od \texttt{url} query parameters.
+The next fuzzer we will describe is TnT-Fuzz \cite{tntFuzzer2020github}. One could think of  TnT-Fuzz as an apiFuzz scaled up. While apiFuzz fuzzes single endpoint, TnT-Fuzz fuzzes all of them. Moreover, it automates the exploration of different endpoints by parsing the OpenAPI specification. From the specification it also gets the correct input types as well as where in the request they should be placed. For example, in request headers, body od \texttt{url} query parameters.
 
-% failed to run
-% unable to create objects according to spec -> most common
-% not entirely folloving spec
-% uses mutation which destroys keys
+Nevertheless, slight difference from apiFuzz can be seen when it comes to input creation. TnT-Fuzz will create the payload in a two steps. First, it will generate random input of correct type. Then, if the request body is in JSON format, it will mutate the input too. Tnt-Fuzz uses PyJFuzz fuzzing framework for fuzzing JSON inputs \cite{pyjfuzz2020github}. A worth to mention fact is that apiFuzz uses the PyJFuzz fuzzing framework as well. Hence we can forsee that TnT-Fuzz will behave rather equivalently as apiFuzz. It as well augments the JSON keys and therefore fuzzes the JSON parser rather that the business logic of the web service. Moreover, the grammar rules are broken one more time - when the input type is JSON object, which is most of the cases. Then TnT-Fuzz will not parse the whole structure of the JSON object but generate a random one instead.
+
+Unfortunately, when we were trying to test the TnT-Fuzz we came across several issues. The first one is that it takes the OpenAPI specification from the \texttt{url} of the web service (e.g. \texttt{http://localhost:2999/api/swagger.json}), however, some services like HashiCorp Vault \cite{vault2020github} provide the specification for authorized users only. This obstacle can be circumvent by supplying an API token for authorization, nevertheless, that means that TnT-Fuzz will running as authorized user during the whole fuzzing session, which might not be desired. Next issue we came across was during fuzzing self-hosted git service \cite{gitea2020web}. TnT-Fuzz was not able to parse the specification and raised an exception.
+
+At last, let us have a look at error reporting. TnT-Fuzz will log every request that is described in the OpenAPI specification by printing it to a terminal in table format. In the table user can find the endpoint to which the request was send, HTTP status code, response body as well as the request in a \texttt{curl} format. User than may subsequently resend the request and analyze the bug in more detail, for example by inspecting the web service logs. However, if a web service does not document the API properly in the specification, for instance by not including status codes signaling client errors (\texttt{404 - Not Found} is most common), it will cluter the logs with numerous false positive findings.
 
 
 \section{RESTler}
@@ -38,12 +39,13 @@ As for the error reporting, RESTler works similar to the apiFuzz. It logs a bug 
 \begin{center}
 \begin{tabular}{|c|c c c|}
 \hline
-& apiFuzz  &  RESTler & TnT-Fuzz \\
+                              & apiFuzz    & TnT-Fuzz   & RESTler    \\
 \hline
-aware of internal structure & black-box & black-box & black-box \\
-aware of input date structure & semi-smart & smart & semi-smart \\
-input generation technique & mutation & generation & combined\\
-statefullness & stateless & statefull & stateless\\
+aware of internal structure   & black-box  & black-box  & black-box  \\
+aware of input data structure & semi-smart & semi-smart & smart      \\
+input generation technique    & mutation   & combined   & generation \\
+statefullness                 & stateless  & stateless  & statefull  \\
+automates API exploration     & no         & yes        & yes        \\
 \hline
 \end{tabular}
 \caption{Comparison of fuzzers focused on fuzzing web services}
@@ -53,6 +55,7 @@ statefullness & stateless & statefull & stateless\\
 
 As we are able to see, API fuzzers have numerous similarities. One of which we have not mentioned yet is a language of implementation. All above-mentioned fuzzer are implemented in \texttt{Python} programing language. \texttt{Python} is a high-level multiparadigm dynamic scipting language. Due to its dynamic nature \texttt{Python} comes especially useful when generating random and unstructured data. Moreover, \texttt{Python} offers a large variety of community-developed modules, for instance \texttt{requests} module including \texttt{HTTP} client for sending requests.
 
-As we can see in table \ref{table:fuzzers-comparison} every discussed fuzzer was using a back-box fuzzing technique. The prelevance of this technique is understandable as their frequent goal is reusability. Moreover, it is rather difficult to monitor a binary without having an access to it, which might by the case of the web services.
+\paragraph{}
+As we can see in table \ref{table:fuzzers-comparison} every discussed fuzzer was using a back-box fuzzing technique. The prelevance of this technique is understandable as their frequent goal is reusability. Moreover, it is rather difficult to monitor a binary without having an access to it, which might by the case of the web services. We may also observe that more advanced fuzzers like RESTler and TnT-Fuzz are using and automation techniques to inspect the API and find the endpoint that they will subsequently fuzz.
 
-To conclude this chapter, we may say that the field of API fuzzers is not as widely researched as the field of fuzzing binaries, which gives us an interesting opportunity to explore it and find out new facts and connections.
+To conclude this chapter, we may say that the field of API fuzzers is not as widely researched as the field of fuzzing binaries, which gives us an interesting opportunity to explore it and find out new facts and interconnections.
