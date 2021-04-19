@@ -61,6 +61,22 @@ To help us model and document the APIs more precisely, OpenAPI specifications ca
 
 
 \section{What is OpenAPI specification}
-OpenAPI specification, previously known as Swagger, was standardized in 2016 and become overseen by the OpenAPI Initiative \cite{openapi2020main}. The specification describes an API in a machine-readable way (usually in JSON or YAML format). It defines different endpoints of the API along with the required and optional headers and response codes. Besides, it defines the payload fields, types, and encodings. This gives us the advantage of knowing the input structure, thus making it easier to make a \emph{smart} fuzzer.
+OpenAPI specification is a way to describes and document an API. Moreover, it is described in a  machine-readable format (in YAML and JSON). In addition to machine-readable format, an interactive UI can be generated from the specification as well.
+
+Two major versions of OpenAPI specification are currently used. The older one is version 2, previously known as Swagger. The newer one which was standardized in 2016 and become overseen by the OpenAPI Initiative \cite{openapi2020main} later is version 3. There are not so many diferences between those versions, however, version 3 included breaking changes which means that new major version needed to be issued. Furhermore, there are also converter between the two versions. We will now focuse on the newer one as its gaining more acceptance in the ecosystem. Version 3 with generated UI can be seen in figure \ref{fig:openapi-specification}.
+
+\begin{figure}[h]
+  \includegraphics[width=\textwidth]{openapi-specification}
+  \caption{OpenAPI specification in YAML format and generated UI}
+  \label{fig:openapi-specification}
+\end{figure}
+
+Let us have a look at the structure of OpenAPI specification and its separate field to gain a better knowledge about provided information, that can we subseqently use to implement a fuzzer.
+
+
+% OpenAPI specification, previously known as Swagger, was standardized in 2016 and become overseen by the OpenAPI Initiative \cite{openapi2020main}. The specification describes an API in a machine-readable way (usually in JSON or YAML format). It defines different endpoints of the API along with the required and optional headers and response codes. Besides, it defines the payload fields, types, and encodings. This gives us the advantage of knowing the input structure, thus making it easier to make a \emph{smart} fuzzer.
 
 \subsection{What OpenAPI provides}
+
+\paragraph{}
+As we were able to see, OpenAPI specification fully describes the API. Thanks to the specification-provided information we can implement a \emph{smart} fuzzer.
