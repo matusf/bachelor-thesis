@@ -24,7 +24,7 @@ The representational state transfer or simply REST is a set of architectural pri
 \paragraph{}
 \textbf{To be stateless} client and server needs to send complete and independent requests. By sending complete and independent requests servers can take an advantage of load-balancing or fowarding the payload to other services for further processing. An ilustrative example is the case of pagination. If the comunication would be statefull (as shown in the figure \ref{fig:Stateful request example}), the server would need to cache the current page of the client. That would mean that only single server would be able to be deployed to hold the state. On the other side, stateless request (as shown in figure \ref{fig:Stateless request example}) enables the server to load-ballance easily.
 
-\begin{figure}
+\begin{figure}[h]
   \begin{subfigure}{}
     \begin{minipage}{0.5\textwidth}
       \begin{minted}{HTTP}
