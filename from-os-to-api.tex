@@ -71,12 +71,35 @@ Two major versions of OpenAPI specification are currently used. The older one is
   \label{fig:openapi-specification}
 \end{figure}
 
-Let us have a look at the structure of OpenAPI specification and its separate field to gain a better knowledge about provided information, that can we subseqently use to implement a fuzzer.
-
-
-% OpenAPI specification, previously known as Swagger, was standardized in 2016 and become overseen by the OpenAPI Initiative \cite{openapi2020main}. The specification describes an API in a machine-readable way (usually in JSON or YAML format). It defines different endpoints of the API along with the required and optional headers and response codes. Besides, it defines the payload fields, types, and encodings. This gives us the advantage of knowing the input structure, thus making it easier to make a \emph{smart} fuzzer.
+Let us have a look at the structure of OpenAPI specification and its separate fields to gain a better knowledge about provided information. We will focuse on context of fuzzing when describing it, since it will be instrumental in subseqent chapters where we will take a look at existing work and implementation of our own fuzzer.
 
 \subsection{What OpenAPI provides}
+As we mentioned before, OpenAPI specification is in JSON or YAML format. We will now traverse the structure and analyze \textit{keys} or \textit{sections} that may be used when fuzzing.
+
+Every OpenAPI specification needs to have a \textbf{openapi} \textit{key} of type string that describes the version of the specification. Moreover, the key must follow the semantic versioning system.
+
+Another \textit{key} in the specification is \textbf{info} which provides metadata about the API mainly. The info is as well a required section and it can contain a license, title or version \cite{openapi2020github}.
+
+Next section that may be present in the specification is \textbf{servers}. This section contains a list of URLs from which the API can be accessed. The servers section provides also a key-value mapping between url variables that can be used for example for versioning as can be seen in figure \ref{fig:Server definition with variables}. However, since this definition is not required, numerous APIs do not use it and include the URL in describtion of other sections. Moreover, the variable mapping is also used only occasionally. This inconsistency in usage makes the server definition not suitable for machine-processing and therefore for fuzzing.
+
+\begin{figure}[h]
+  \begin{minted}{YAML}
+servers:
+- url: https://server.com/{basePath}
+  variables:
+    basePath:
+      default: v2
+  \end{minted}
+  \caption{Server definition with variables example}
+  \label{fig:Server definition with variables}
+\end{figure}
+
+The most informative and therefore most essential section of the OpenAPI specification is \textbf{paths}. The path section consists of list of path objects definitions, where each definition describes one resource (URI path). Here we may notice the interconnection between REST design strategy and OpenAPI specification. For each resouce there are defined methods that correspond to the CRUD operations for manipulation of the resource. Every method of a resouce describes id great detail how the request to the described resouce should look like. It defines the request body, its content type, structure and types. Similarly it defines the parameters. From the parameters definition we determine where they are located, whether it is a path, headers, cookies or query parameters. What is their structure, types and if they are required. In addition to possible inputs of the resouce, the method definition states the possible outputs as well - responses. The definition of responses supplies list of response objects. Every response object defines a HTTP status code, headers and content that can be received as response from particular resouce-method pair. The content object is rather akin to the request body object. It defines the content type, structure and types of the fields in the structure as well.
+
+As you now APIs reuse many things and the same holds true for their descriptions. For instance, the structure of error message may be the same for every resource. Another example can be lisitng an objects and getting a single one. The structure of responses or even requests might be rather alike. One can imagine how tedious and error-prone would it be to write the same definitions to numerous resources. For this particular reason OpenAPI specification defines a section called \textbf{components}. In components section user may define structures, as a single point of truth, that can be subsequently referenced in other sections. An example can be seen in figure \ref{fig:openapi-specification} where the \texttt{ErrorResponse} object is defined in components section and referenced from response object in \texttt{/user/\{userID\}} resource.
+
+The last top-level section that we will explore is \textbf{security} section. This section ilustrates which authorization schemes the API uses. The security scheme consists of type, for instance apiKey, http, oauth2, openIdConnect or mutualTLS, name, its location in the request and other information based on the scheme type. The authorization scheme can be then applied per resource-method pair or to the whole API.
+
 
 \paragraph{}
-As we were able to see, OpenAPI specification fully describes the API. Thanks to the specification-provided information we can implement a \emph{smart} fuzzer.
+Now that we have a deeper understanding of what OpenAPI specification provides, we can have a look at the existing work in a fields of fuzzing web services. We will see if or how the OpenAPI specification was used in the existing work and in later chapters we will detail how it can help us to implement a \emph{smart} fuzzer.
