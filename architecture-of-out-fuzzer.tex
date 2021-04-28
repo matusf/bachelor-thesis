@@ -1,11 +1,37 @@
 \chapter{Architecture of our fuzzer}
-In this chapter we will discuss the architecture of our fuzzer.
+Now we can see that more and more people are interacting with services and applications through the web interface, fuzzing of web services is becoming more instumental than ever. In the prevoius chapters we have searched through and gained a better understanding of the existing state-of-the-art work. Now, we can think of what to do differently and how to improve on it. In this chapter we will discuss our design decision we made when creating the fuzzer. Moreover, we will categorize do a basic taxonomy of the fuzzer.
 
-\section{Why is a black-box fuzzing good fit for web services}
-In the case of performing offensive security, we might not have access to the source code of the target to perform some analysis. We will only be able to access some interface of the target. This is even more true when it comes to web services.
+\section{Taxonomy of our fuzzer}
 
-\section{Why use OpenAPI}
+\subsection{Why black-box}
+Reusability is essential for us when creating the fuzzer. We want to out fuzzer to be able to fuzz as many services as possible with the fewest modifications as possible. Therefore, we decided to implement a fuzzer that does not need to be awere of internal structure of fuzzed program - a black-box fuzzer. Moreover, a combionation of black-box fuzzer and web service as a target gives us a compelling property. We are able to fuzz a software without having an access to its source or even binary format. This property can be widely used in offensive security where it is not possible to perform some kind of static or dynamic analysis on the source.
 
-\section{On multiprocessing and speed}
+\subsection{Why \textit{smart}}
+When choosing between \textit{smart} and \textit{dumb} fuzzer, the \textit{smart} one is undoubtably a better choice since it produces less input, that would be rejected right away by the input parser program. However to build a \textit{smart} fuzzer we need to know the structure of the input data. Web services do not follow any standard or specification per se, but they can be described by one - the OpenAPI specification. We have already had a look at the OpenAPI specification in section \ref{sec:openapi} and we know, that it indeed detils the API precisely. Thus, we will take an advantage of it when designing our fuzzer.
 
-\section{Replaying the results}
+\subsection{Why generation-based}
+The technique used in an input data creation frequently dependents on the information known about the input. The more we know about the structure of the data, the more efficiently we are able to fuzz. When minimal information is provided the mutation-based approach is inevitable. Nevertheless, since we decided to take advantage of OpenAPI specification, we possess the knowledge of grammar of every request and therefore, we are able to generate an input from it. Furthermore, from the paper published by Miller and Peterson we found out that generation-based fuzzing techniques perform 76\% better when compared to mutation-based fuzzing techniques\cite{miller2007analysis}. Because of above-mentioned reasons our input data creation technique of choice will be generation-based one.
+
+\subsection{Why stateless}
+The statefullness is not a standard property described in context of fuzzers, however, when we were exploing the existing work in a space of web services fuzzers, we discussed it. So let us discuss it in more detail. We will refer to statefull fuzzers and RESTler interchangably as RESTler is the only statefull fuzzer known by us.
+
+The main asset of RESTler is that its efficiency. It produces very small number of requests needed to trigger a bug. However, as we discussed in section \ref{sec:restler} it perfored similarly well when using statefull and random walk strategy.
+
+Besides this, the statefull approach triggers different kind of bugs. The RESTler - as a representant of statefull fuzzers was able to trigger a "user workflow" bugs. Those are bugs are triggered after specific actions that resemble user interaction with the web service. One example might be that user creates a resource, then deletes it and subsequently tries to update it.
+
+On the other side, stateless fuzzer trigger bug mimicing the "programers bugs", like buffer overflows, parser errors, indexing out of range and others. Additionaly, it may focuse on producing input that is random enough, which was not able it case of RESTler \cite{atlidakis2019restler}. Another features that convinced us to proceed with stateless fuzzer is its simplier implementation and grater performance in terms of speed.
+
+
+\begin{figure}[h]
+    \center
+    \def\svgwidth{\columnwidth}
+    \scalebox{0.7}{\input{images/fuzzer-architecture.pdf_tex}}
+    \caption{OpenAPI fuzzer architecture}
+    \label{fig:fuzzer-architecture}
+\end{figure}
+% \section{Why random}
+% \section{Why unicode}
+
+% \section{On multiprocessing and speed}
+
+% \section{Replaying the results}

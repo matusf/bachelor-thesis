@@ -21,7 +21,8 @@ At last, let us have a look at error reporting. TnT-Fuzz will log every request 
 
 
 \section{RESTler}
-The last fuzzer we will take a look at is called RESTler developed by Microsoft Research team \cite{atlidakis2019restler}. As the RESTler's research paper states, the main asset of RESTler is statefullness. Moreover, it claims to be the statefull REST API fuzzer. Before we proceed with exploration of its numerous features, let us look into what statefullness means in context of API fuzzers.
+\label{sec:restler}
+The last fuzzer we will take a look at is called RESTler developed by Microsoft Research team \cite{atlidakis2019restler}. As the RESTler's research paper states, the main asset of RESTler is statefullness. Moreover, it claims to be the first statefull REST API fuzzer. Before we proceed with exploration of its numerous features, let us look into what statefullness means in context of API fuzzers.
 
 Nearly every service holds some state, mainly in form of database. Making a request to the API may change the state. For example, \texttt{POST} request will create and \texttt{PUT} request will update an item in the database. Knowing whether an item exists is crutial if the most  efficient usage of resources is desired. Request that queryies an item that yet was not created is essentially useless. The API will most probably response with status code signaling user error - \texttt{Not Found}. This kind of request only wasted the valuable resources.
 
