@@ -1,7 +1,8 @@
-\chapter{Architecture of our fuzzer}
-Now we can see that more and more people are interacting with services and applications through the web interface, fuzzing of web services is becoming more instumental than ever. In the prevoius chapters we have searched through and gained a better understanding of the existing state-of-the-art work. Now, we can think of what to do differently and how to improve on it. In this chapter we will discuss our design decision we made when creating the fuzzer. Moreover, we will categorize do a basic taxonomy of the fuzzer.
+\chapter{Architecture of OpenAPI Fuzzer}
+Now we can see that more and more people are interacting with services and applications through the web interface, fuzzing of web services is becoming more instumental than ever. In the prevoius chapters we have searched through and gained a better understanding of the existing state-of-the-art work. Now, we can think of what to do differently and how to improve on it. In this chapter we will discuss our design decision we made when creating the fuzzer.
 
 \section{Taxonomy of our fuzzer}
+Before we dive into more details, let us categorize our fuzzer into the standard categories used in context of fuzzing. These categories include input creation technique, the knowledge of the structure of input data as well as whether the fuzzer is aware of the internal structure of fuzzed program.
 
 \subsection{Why black-box}
 Reusability is essential for us when creating the fuzzer. We want to out fuzzer to be able to fuzz as many services as possible with the fewest modifications as possible. Therefore, we decided to implement a fuzzer that does not need to be awere of internal structure of fuzzed program - a black-box fuzzer. Moreover, a combionation of black-box fuzzer and web service as a target gives us a compelling property. We are able to fuzz a software without having an access to its source or even binary format. This property can be widely used in offensive security where it is not possible to perform some kind of static or dynamic analysis on the source.
@@ -21,17 +22,52 @@ Besides this, the statefull approach triggers different kind of bugs. The RESTle
 
 On the other side, stateless fuzzer trigger bug mimicing the "programers bugs", like buffer overflows, parser errors, indexing out of range and others. Additionaly, it may focuse on producing input that is random enough, which was not able it case of RESTler \cite{atlidakis2019restler}. Another features that convinced us to proceed with stateless fuzzer is its simplier implementation and grater performance in terms of speed.
 
+\paragraph{}
+To put OpenAPI Fuzzer into perspective with the fuzzer described in prevoius chapter we may have a look at the table \ref{table:openapi-fuzzers-comparison}.
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|c|c c c c|}
+\hline
+                              & apiFuzz    & TnT-Fuzz   & RESTler    & \textbf{OpenAPI Fuzzer} \\
+\hline
+aware of internal structure   & black-box  & black-box  & black-box  & black-box               \\
+aware of input data structure & semi-smart & semi-smart & smart      & smart                   \\
+input generation technique    & mutation   & combined   & generation & generation              \\
+statefullness                 & stateless  & stateless  & statefull  & stateless               \\
+automates API exploration     & no         & yes        & yes        & yes                     \\
+\hline
+\end{tabular}
+\caption{Comparison between OpenAPI fuzzer and other existing fuzzers focused on fuzzing web services}
+\label{table:openapi-fuzzers-comparison}
+\end{center}
+\end{table}
+
+
+\section{OpenAPI Fuzzer in greater detail}
+In the figure \ref{fig:fuzzer-architecture} we can see a diagram of fuzzer architecture. Now we will describe it from a higher level and go through the details in the implementation section.
 
 \begin{figure}[h]
     \center
     \def\svgwidth{\columnwidth}
     \scalebox{0.7}{\input{images/fuzzer-architecture.pdf_tex}}
-    \caption{OpenAPI fuzzer architecture}
+    \caption{OpenAPI Fuzzer architecture}
     \label{fig:fuzzer-architecture}
 \end{figure}
-% \section{Why random}
-% \section{Why unicode}
 
-% \section{On multiprocessing and speed}
+Firstly, we decided to create a OpenAPI Fuzzer as a command line program as it offers most great granularity when it comes to configuration. Moreover, the target audience for the fuzzer are engineers that should not have any issue with CLI.
+
+When it comes to retrieving the specification we chose to supply it as an argument instead of instructing the fuzzer to dowload it from target, which was the case of TnT-Fuzz described in section \ref{sec:tnt-fuzz}. By supplying the specification separately we avoid scenarios where the authorization is needed to retrieve the specification and therefore, some kind of token needs to be provided to the fuzzer. Supplying the specification manually gives user the ability to modify it, which is useful when the user do not want to fuzz certian endpoints. For instance we might not want to send requests to logout endpoints when running the authorized session for obvious reasons. Moreover, some endpoints might be useless to fuzz as they perform minimal actions in the application and thus we only waste resources when calling them. Those kind of endpoint may include version or status endpoint. We also chose to use use version 3 since it is gaining a wider adopion and version 2 is slowly being phased out. OpenAPI fuzzer is the only fuzzer we know of that uses OpenAPI specification version 3.
+
+After successful parsing of OpenAPI specification the fuzzer will find a resources and create the input for requests. We agreed to follow the types and structure of the input fields which was not the case of apiFuzz \cite{apiFuzz2020github} and TnT-Fuzz \cite{tntFuzzer2020github}. Where the OpenAPI Fuzzer differs from the RESTler \cite{atlidakis2019restler} is in data randomness. Instead of small \textit{fuzzing dictionary} the OpenAPI fuzzer will generate data at random. Another worth mentioning feature of OpenAPI fuzzer's input data generation is that it creates random \textbf{unicode} strings. We have made this decision because unicode is notoriously difficult to get right. Large number of programing languages store strings as a array of bytes. Indexing or slicing of such an array may result in a buggy behaviour. Moreover, the random input data generator can be seeded, which may help in reproducability of fuzzer's runs.
+
+The next step after input data creation is sending of requests. Determined that for know it will be most beneficial to send the request synchronously for following reasons. Synchous requests are in deterministic order which means that they can be resent in the same order and therefore make same effects on the API. Thus deteminism is crutial when implementing reproducable runs.
+% not dosing as well
+
+When requests are sent OpenAPI Fuzzer proceeds to determining which ones are results of triggered bugs. OpenAPI fuzzer will mark a request as a bug when it receives response with HTTP status code from range of server errors (500). Likewise behaviour can be seen in apiFuzz and RESTler. However, OpenAPI Fuzzer takes the advantage from the OpenAPI specification from different angle. Since OpenAPI specification defines what response codes are to be expected from an endpoint, the OpenAPI fuzzer will report a bug when this condition is not met. Thus we are able to catch even more subtle bugs that other fuzzers would ignore.
+
+Nonetheless, we found out that many APIs do not include all HTTP response codes that may be returned from an endpoint in the OpenAPI specification. After all, the specification does not state that all possible response codes MUST be defined \cite{openapi2020github}. Mostly the undefined response codes were from client error range (400) and indeed were not the most interesting for us. Inevitably, we were receiving numerous false positive results. For this reason we designed a way to ignore certian status codes and our false positive rate decreased to minimum.
+
+The last part of the fuzzer loop is error reporting and displaying progress. In a nutshell, we decided to follow a unix philosophy and store the results in a way that they are able to be procesed by other unix commands. Further, current state of the fuzzer is displayed in a TUI make the tracking of progress easier.
 
 % \section{Replaying the results}

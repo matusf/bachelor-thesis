@@ -5,3 +5,20 @@ In this chapter we discuss the implementation of the fuzzer.
 % - arbitrary to generate input
 % - use native certs
 % - openapiv3 crate parse & openapi_utils to dereference
+
+\begin{figure}
+    \begin{verbatim}
+    Usage: openapi-fuzzer -s <spec> -u <url> [-i <ignore-status-code>] [-H <header>]
+
+    OpenAPI fuzzer
+
+    Options:
+        -s, --spec                 path to OpenAPI specification
+        -u, --url                  url of api to fuzz
+        -i, --ignore-status-code   status codes that will not be considered as finding
+        -H, --header               additional header to send
+        --help                     display usage information
+\end{verbatim}
+\caption{OpenAPI Fuzzer help message}
+\label{fig:openapi-help}
+\end{figure}
