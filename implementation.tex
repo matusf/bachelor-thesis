@@ -61,4 +61,7 @@ For the implementation of the TUI we used a \texttt{tui-rs} \cite{tuirs2020githu
 \end{figure}
 
 \paragraph{}
+In addition to OpenAPI Fuzzer, we also implemented a program to resend the request that caused the bug that is tightly integrated with the fuzzer. It is a command line program and it takes a result file generated from the fuzzer as input and makes the resends the requests. User is able to pass a header via command line flag and overwrite the one stored in a restult file too. This is convenient is sutiations where the fuzzer was running an authorized session but the token used for authorization expired and thererore, the request to be resent would produce and authorization failure.
+
+\paragraph{}
 Now that we know the internal structure and architecture of the OpenAPI Fuzzer, it is time to test it. In the next chapter we will present results we achieved when we were fuzzing some well known and battle-tested APIs.
