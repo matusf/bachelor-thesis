@@ -21,7 +21,7 @@ The first one among the well-known battle-tested software we fuzzed is \textbf{H
 The next software we fuzzed is \textbf{Gitea}. Gitea is a self-hoted Git service that describes itself as a community managed lightweight code hosting solution written in Go \cite{gitea2020web}. We ran a quick unauthorized session, however, after a while of not getting any relevant results we decided to run an authorized one. During the authorized run we have found 4 bugs out of which we were able to reproduce and report 3 of them (\cite{giteaissue15346github}, \cite{giteaissue15357github}, \cite{giteaissue15356github}). All 3 of them were acknowledged by the maintainers and further discussed. Moreover, 2 of them are already fixed and will be included in next release. Since Gitea provides detailed logs we were able to quickly find the cause of the issues. Two of the bugs were caused by quering non-existent entity and the other one was caused by unhandled date parsing failure.
 
 \paragraph{}
-The last software we took a look at is \textbf{Kubernetes} or simply \textbf{k8s}. Kubernetes is an open-source container-orchestration system for automating computer application deployment, scaling, and management which was created by Google and now it is maintained by the Cloud Native Computing Foundation \cite{k8s2021web}. It is consider to be de-facto standard in cloud computing. As before we ran kubernetes in two times. The first time we ran an unauthorized session for 15 hours during which we were not able to find any bugs. During the authorized session we were able to trigger 14 bugs in 65 hours. Nonetheless, after further inspection we came to conclusion that 12 of them were caused by the same underlining bug. All 12 endpoints were taking the same query parameter which if was supplied in an incorrect format failed the operation and resulted in an internal server error. Therefore, when filing issues for the bugs we decided to mark it as a one bug. All 3 issues received acknowledgment and there are already two pull requests for fixing the bugs (\cite{k8sissue101355github}, \cite{k8sissue101350github}, \cite{k8sissue101348github}). As for the types of bugs, one was caused by unhandled version parsing failure, anotherone was caused by quering file with too long name and the last one was caused by quering non-existent entity.
+The last software we took a look at is \textbf{Kubernetes} or simply \textbf{k8s}. Kubernetes is an open-source container-orchestration system for automating computer application deployment, scaling, and management which was created by Google and now it is maintained by the Cloud Native Computing Foundation \cite{k8s2021web}. It is consider to be de-facto standard in cloud computing. As before we ran kubernetes in two times. The first time we ran an unauthorized session for 10 hours during which we were not able to find any bugs. During the authorized session we were able to trigger 14 bugs in 65 hours. Nonetheless, after further inspection we came to conclusion that 12 of them were caused by the same underlining bug. All 12 endpoints were taking the same query parameter which if was supplied in an incorrect format failed the operation and resulted in an internal server error. Therefore, when filing issues for the bugs we decided to mark it as a one bug. All 3 issues received acknowledgment and there are already two pull requests for fixing the bugs (\cite{k8sissue101355github}, \cite{k8sissue101350github}, \cite{k8sissue101348github}). As for the types of bugs, one was caused by unhandled version parsing failure, anotherone was caused by quering file with too long name and the last one was caused by quering non-existent entity.
 
 \paragraph{}
 \begin{table}[h]
@@ -30,7 +30,7 @@ The last software we took a look at is \textbf{Kubernetes} or simply \textbf{k8s
 \hline
 Fuzzed software & Vault & Vault\textsuperscript{A} & Gitea\textsuperscript{A} & kubernetes\textsuperscript{A} \\
 \hline
-time to majority bugs & 2h  & 2h  & -  & 15h \\
+time to majority bugs & 20' & 2h  & -  & 15h \\
 number of bugs        & 3   & 8   & -  & 13  \\
 \hline
 total time            & 24h & 24h & 6h & 65h \\
@@ -42,7 +42,4 @@ total number of bugs  & 6   & 9   & 4  & 14  \\
 \end{center}
 \end{table}
 
-% \subsection{Authorization to increase coverage}
-% - able to specify with cli args
-% - more findings when auth token is provided (gitea/vault)
-% - without token only auth is fuzzed since payload is usually not even parsed
+As we are able to see the OpenAPI Fuzzer was largely successful when fuzzing the APIs. It found bugs in battle-tested production grade software and was able to report them in a form, that we could easily file all bug reports. Moreover, we see from the table \ref{table:fuzzed-software} that authorization is rather useful when we want to increase the code coverage. All authorized runs produced more results than the unauthorized ones. The poor results from unauthorized runs were caused by the APIs shor-circuiting the flow - when the authorization is not provided the APIs will usually not even try to parse the payload and return a HTTP status code signalling that authorization is needed. Additionaly, we can also see that the majority of the bugs are found quite quickly. On the other side, it takes noticably more time to find the remaining bugs.
