@@ -70,8 +70,8 @@ Nonetheless, we found out that many APIs do not include all HTTP response codes 
 
 The last part of the fuzzer loop is error reporting and displaying progress. In a nutshell, we decided to follow a unix philosophy and store the results in a way that they are able to be procesed by other unix commands. Further, current state of the fuzzer is displayed in a TUI make the tracking of progress easier.
 
-\subsubsection{Replaying the results}
+\subsection{Replaying the results}
 Trigerring bugs is only one significant part of fuzzing. The other one is being able to reproduce it and report it. For this reason we created a program called \newline \texttt{openapi-fuzzer-resender} that takes the report created by \texttt{openapi-fuzzer} and makes the request. Thanks to the resender user is able to trigger the bug after fuzzing is finished. The advantage is that the application logs are not cluttered by stream of other requests and thus it is easier to gain more information about the bug from logs.
 
-\subsubsection{Authorization for better coverage}
+\subsection{Authorization for better coverage}
 After several runs of the fuzzer we found out that large number of APIs have authorization and they will not even parse the payload if it is not provided, rendering out fuzzer useless in those situations. Hence we added an authorization option for the fuzzer. The authorization can be supplied in a form of HTTP headers meaning that basic authentication, API key authorization or authorization via cookie is supported. We will conclude on the results and efficiency of authorized versus non-authorized runs in following chapters.
