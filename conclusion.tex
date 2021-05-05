@@ -1,5 +1,5 @@
 \chapter{Conclusion}
-In this chapter we will present the possiblites of our fuzzer.
+In this chapter we will present the possible enhancements that can be done to improve our fuzzer. Additionally, we will conclude our findings and summarize our work.
 
 \section{Future work}
 We explored the possiblily of fuzzing an API with help of OpenAPI specification and created a fuzzer that uses the specification in an unique. However, the potential of utilizing OpenAPI specification when fuzzing APIs is not used up at all. In following paragraphs we will dicsuss some additional work that could be done to improve the fuzzer.
@@ -16,3 +16,6 @@ When we were talking about randomizing input we wanted only to augment it. Mostl
 
 \section{Closing thoughts}
 % use as spec verification
+The need for providing production-grade quality software was there from the inception of software engineering. The most effective way to ensure the quality of a software proved to be testing. Throughtout the history of computer science software engineers and architects came up with different testing methods and techniques. Nonetheless, manual way of writing test was demonstrated to be insufficient and therefore random walk testing - fuzzing was invented \cite{miller1990empirical}.
+
+However, as more and more applications moved from PCs to the web, a new challenge arised. Engineers needed to find a way to effectively fuzz the web applications. Our focus was primarily on this aspect of the fuzzing. We researched different existing implementations of web fuzzers. Found out a way to get the description of the web services and subsequently create a fuzzer that utilizes it to fuzz APIs automatically. With our unique generation-based \textit{smart} black-box fuzzer we were able to find bugs in such battle-tested web services as Kubernetes, Gitea and Vault.
