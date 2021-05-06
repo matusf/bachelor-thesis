@@ -1,6 +1,6 @@
 \chapter{Fuzzing 101}
 \label{cha:Introduction to fuzzing}
-The issue of providing production-grade software was there from the inception of software engineering. Engineers used numerous testing methods to achieve the desired quality. Most widely used testing methods were unit testing and integration testing.
+The issue of providing production-grade software was there from the inception of software engineering. Engineers used numerous testing methods to achieve the desired quality. The most widely used testing methods were unit testing and integration testing.
 
 Unit testing consists of running automated test units where each unit tests a specific part of the application, like a couple of functions or a whole interface. Unit testing, therefore, enforces the correctness of individual parts of the application and thus enables faster refactorization. Nonetheless, to create self-contained testable units, we often need to mock some parts of the application, which may significantly decrease the coverage.
 
@@ -8,9 +8,9 @@ Integration testing, on the other hand, does not run small units. It combines al
 
 
 \section{Why fuzzing}
-The above-mentioned testing methods, however, proved insufficient when Miller with his team were able to crash from 24\% to 33\% of nearly 90 Unix battle-tested utilities. They were generating random inputs and reporting the error if the program crashed or hanged. Miller described the fuzz testing strategy as a random walk through state space of a program, represented by a state machine, searching for undefined states \cite{miller1990empirical}.
+The above-mentioned testing methods, however, proved insufficient when Miller with his team was able to crash from 24\% to 33\% of nearly 90 Unix battle-tested utilities. They were generating random inputs and reporting the error if the program crashed or hanged. Miller described the fuzz testing strategy as a random walk through the state space of a program, represented by a state machine, searching for undefined states \cite{miller1990empirical}.
 
-One of the most frequent bugs caught by fuzzers are buffer overflows, memory leaks and formatting errors. This sort of bugs may seem innocent and one might think that they will only crash the application. On the contrary, these bugs may leed to severe vulnerabilities such as heartbleed bug \cite{heartbleed2020bug} in widely used TLS implementation, which caused primary keys to leak and thus exposed the entire communication unencrypted. There is an example implementation of how to find the heartbleed vulnerability right in the ClusterFuzz documentation \cite{clusterfuzz2020heartbleed}.
+Some of the most frequent bugs caught by fuzzers are buffer overflows, memory leaks, and formatting errors. These sorts of bugs may seem innocent and one might think that they will only crash the application. On the contrary, these bugs may lead to severe vulnerabilities such as heartbleed bug \cite{heartbleed2020bug} in widely used TLS implementation, which caused primary keys to leak and thus exposed the entire communication unencrypted. There is an example implementation of how to find the heartbleed vulnerability right in the ClusterFuzz documentation \cite{clusterfuzz2020heartbleed}.
 
 
 \section{Types of fuzzers}
@@ -24,11 +24,11 @@ The success of random walk testing - fuzzing, did not end there. Nevertheless, b
 
 \subsection{White-box gray-box and black-box fuzzers}
 \label{ssub:White-box gray-box and black-box fuzzers}
-\textbf{White-box fuzzers} are aware of the internal structure of the program. Thus, they need to have access to the source code of the program. They use a program analysis to increase a code coverage \cite{neystadt2008automated}. We may define code coverage as a measurement of how much of the state space is reached during the random walk. In case of available program specification, the fuzzer may leverage techniques from model-based testing to generate testing inputs and subsequently verify it with the specification. White-box fuzzers, however, may need a substantial time to be integrated with the fuzzed target.
+\textbf{White-box fuzzers} are aware of the internal structure of the program. Thus, they need to have access to the source code of the program. They use a program analysis to increase code coverage \cite{neystadt2008automated}. We may define code coverage as a measurement of how much of the state space is reached during the random walk. In the case of available program specifications, the fuzzer may leverage techniques from model-based testing to generate testing inputs and subsequently verify them with the specification. White-box fuzzers, however, may need substantial time to be integrated with the fuzzed target.
 
 \textbf{Black-box fuzzers} on the other hand are not aware of the program structure. They treat the program as a black-box. They test the compiled version of the program \cite{takanen2018fuzzing}. Since the black-box fuzzers do not need to know anything about the program structure, they tend to be more performant and reusable. Hight level of paralelization can be usually applied as well. Additionally, black-fuzzing is often combined with \emph{smart} fuzzing technique \cite{neystadt2008automated}, which we discuss below. The disadvantage of the black-box fuzzing technique is that it may not achieve as high code coverage as white-box fuzzer due to not having any knowledge about the program structure.
 
-\textbf{Gray-box fuzzing} can be described as a combination of black-box and white-box fuzzing techniques. Gray-box testing leverages intrumentation technique like profiling to analyze the program while not having the access to its source code. The gray-box fuzzing has the advantage of being more thorough than black-box fuzzing and being faster than white-box fuzzing.
+\textbf{Gray-box fuzzing} can be described as a combination of black-box and white-box fuzzing techniques. Gray-box testing leverages instrumentation techniques like profiling to analyze the program while not having the access to its source code. The gray-box fuzzing has the advantage of being more thorough than black-box fuzzing and being faster than white-box fuzzing.
 
 
 \subsection{\emph{Dumb} and \emph{smart} fuzzers}
@@ -37,7 +37,7 @@ The primary job of a fuzzer is to generate some input. The input should be \emph
 
 \textbf{\emph{Smart} fuzzer} knows the structure of the input data. For instance, it knows that it will be fuzzing an application that uses a specific protocol. Thus, it will comply with the protocol by sending data in an appropriate format, computing the correct checksums, etc. Then it will send the fuzzed input via this protocol in a valid format.
 
-On the other hand, \textbf{\emph{Dumb} fuzzer} does not know anything about the input structure. It may take the input that is accepted by the program and start flipping some bits in it or inserting some random sequences of bits. This approach has the obvious disadvantage when compared to the \emph{smart} fuzzer. It will generate a lot of input that will be rejected right away by the input parser of the program. The advantage of \emph{dumb} fuzzer is its reusability and easier implementation.
+On the other hand, \textbf{\emph{Dumb} fuzzer} does not know anything about the input structure. It may take the input that is accepted by the program and start flipping some bits in it or inserting some random sequences of bits. This approach has an obvious disadvantage when compared to the \emph{smart} fuzzer. It will generate a lot of input that will be rejected right away by the input parser of the program. The advantage of \emph{dumb} fuzzer is its reusability and easier implementation.
 
 \subsection{Generation-based and mutation-based fuzzers}
 \label{ssub:Generation-based and mutation-based fuzzers}
@@ -57,7 +57,7 @@ American fuzzy lop is a security-oriented fuzzer that employs a novel type of co
 
 The following features make american fuzzy lop successful:
 \begin{itemize}
-    \item It fuzzes targets at roughly their native speed due to low-level compile-time or binary-only instrumentation like.
+    \item It fuzzes targets at roughly their native speed due to low-level compile-time or binary-only instrumentation.
     \item It uses high-gain test case preprocessing and fuzzing strategies that help it discover even subtle and other hard-to-catch bugs.
     \item It is battery included and comes with various tools like a crash explorer, a fault-triggering allocator, a syntax analyzer, and a test case minimizer. Test case minimizer may, for instance, trim variable-length blocks of data in large files, which results in better performance \cite{afl2019docs}.
 \end{itemize}
@@ -72,7 +72,7 @@ ClusterFuzz is not a single fuzzer. It is a distributed fuzzing infrastructure f
 Thanks to the following traits, as of September 2020, ClusterFuzz was able to find more than 25000 bugs in Google products and around 22500 bugs in other open-source software \cite{clusterfuzz2020readme}.
 
 \begin{itemize}
-    \item support of multiple coverage guided fuzzing engines including libFuzzer, AFL and Honggfuzz
+    \item support of multiple coverage-guided fuzzing engines including libFuzzer, AFL and Honggfuzz
     \item support for black-box fuzzing
     \item ability to duplicate the crashes
     \item ability to shorten the fuzzing inputs for easier debugging
