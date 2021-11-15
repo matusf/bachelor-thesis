@@ -2,6 +2,8 @@
 
 ## Building
 
+A pre-built thesis can be found in [releases](https://github.com/matusf/bachelor-thesis/releases).
+
 ### Requirements
 
 - pdflatex
